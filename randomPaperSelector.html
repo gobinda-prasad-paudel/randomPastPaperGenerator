@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Random A Levels Past Paper Generator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .spinning {
+      animation: spin 0.5s linear infinite;
+    }
+  </style>
+</head>
+
+<body class="flex items-center justify-center min-h-screen bg-gray-100">
+  <div class="bg-white p-6 rounded-lg shadow-lg w-80 text-center">
+    <h2 class="text-xl font-semibold mb-4">Random A Levels Past Paper Generator</h2>
+    <label for="examBoard" class="block text-sm font-medium text-gray-700">Select Exam Board:</label>
+    <select id="examBoard" class="w-full p-2 border rounded-lg mb-3">
+      <option value="cambridge">Cambridge (CAIE) (Normal A levels)</option>
+      <option value="aqa">AQA</option>
+      <option value="edexcel">Edexcel</option>
+      <option value="igcse">IGCSE</option>
+    </select>
+
+    <label for="subject" class="block text-sm font-medium text-gray-700">Select Subject:</label>
+    <select id="subject" class="w-full p-2 border rounded-lg mb-3">
+    </select>
+
+    <label for="paper" class="block text-sm font-medium text-gray-700">Select Paper:</label>
+    <select id="paper" class="w-full p-2 border rounded-lg mb-3">
+    </select>
+
+    <button id="randomBtn" onclick="generatePastPaper()"
+      class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition my-6">Random</button>
+    <button id="removeBtn" onclick="removePastPaper()"
+      class="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600" style="display:none;">Remove</button>
+
+    <p id="output" class="mt-4 text-lg font-semibold text-gray-800"></p>
+  </div>
+
+  <script>
+    const subjects = {
+      "cambridge": {
+        "8021": { name: "English General Paper", years: [18, 19, 20, 21, 22, 23, 24], papers: [1, 2] },
+        "9231": { name: "Further Mathematics", years: [20, 21, 22, 23, 24], papers: [1, 2, 3, 4] },
+        "9608": { name: "Computer Science", years: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24], papers: [1, 2, 3, 4] },
+        "9702": { name: "Physics", years: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24], papers: [1, 2, 3, 4, 5] },
+        "9709": { name: "Mathematics", years: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24], papers: [1, 2, 3, 4, 5] }
+      },
+      "aqa": {
+        "6010": { name: "English Language", years: [16, 17, 18, 19, 20, 21, 22], papers: [1, 2] },
+        "7357": { name: "Mathematics", years: [15, 16, 17, 18, 19, 20], papers: [1, 2, 3, 4] },
+        "7404": { name: "Physics", years: [16, 17, 18, 19, 20], papers: [1, 2, 3] }
+      },
+      "edexcel": {
+        "XMA0": { name: "Mathematics", years: [15, 16, 17, 18, 19, 20], papers: [1, 2, 3, 4] },
+        "PHS1": { name: "Physics", years: [15, 16, 17, 18, 19, 20], papers: [1, 2, 3] }
+      },
+      "igcse": {
+        "0620": { name: "Mathematics", years: [16, 17, 18, 19, 20], papers: [1, 2, 3, 4] },
+        "0610": { name: "Physics", years: [16, 17, 18, 19, 20], papers: [1, 2, 3] }
+      }
+    };
+
+    function populateSubjects() {
+      let examBoard = document.getElementById("examBoard").value;
+      let subjectSelect = document.getElementById("subject");
+      subjectSelect.innerHTML = "";
+      Object.keys(subjects[examBoard]).sort().forEach(subjectCode => {
+        let option = document.createElement("option");
+        option.value = subjectCode;
+        option.textContent = `${subjects[examBoard][subjectCode].name} (${subjectCode})`;
+        subjectSelect.appendChild(option);
+      });
+      populatePapers();
+    }
+
+    function populatePapers() {
+      let paperSelect = document.getElementById("paper");
+      paperSelect.innerHTML = "";
+      let examBoard = document.getElementById("examBoard").value;
+      let subjectKey = document.getElementById("subject").value;
+      subjects[examBoard][subjectKey].papers.forEach(paper => {
+        let option = document.createElement("option");
+        option.value = paper;
+        option.textContent = `Paper ${paper}`;
+        paperSelect.appendChild(option);
+      });
+    }
+
+    function removePastPaper() {
+      let removeBtn = document.getElementById("removeBtn");
+      let output = document.getElementById("output");
+      output.textContent = ""; // Clear the output text
+      removeBtn.style.display = "none"; // Hide the Remove button
+    }
+
+    function generatePastPaper() {
+      let examBoard = document.getElementById("examBoard").value;
+      let subjectKey = document.getElementById("subject").value;
+      let paper = document.getElementById("paper").value;
+      let randomBtn = document.getElementById("randomBtn");
+      randomBtn.classList.add("spinning");
+
+      setTimeout(() => {
+        let bc = subjects[examBoard][subjectKey].years[Math.floor(Math.random() * subjects[examBoard][subjectKey].years.length)];
+        let d = Math.floor(Math.random() * 3) + 1; // Random D value between 1 and 3
+        let a = ['s', 'w', 'm'][Math.floor(Math.random() * 3)]; // Random a value (s, w, or m)
+        let filename = `${subjectKey}_${a}${bc}_qp_${paper}${d}`;
+
+        document.getElementById("output").textContent = filename;
+        randomBtn.classList.remove("spinning");
+
+        // Show Remove button if output has content
+        if (document.getElementById("output").textContent.length > 0) {
+          document.getElementById("removeBtn").style.display = "block";
+        }
+      }, 1000);
+    }
+
+    document.getElementById("examBoard").addEventListener("change", populateSubjects);
+    document.getElementById("subject").addEventListener("change", populatePapers);
+    window.onload = populateSubjects;
+  </script>
+</body>
+
+</html>
